@@ -1,0 +1,14 @@
+<use name=IORawData/DaqSource>
+<use name=FWCore/Framework>
+
+<library file=stubs/DummyUnpackingModule.cc name=testIoRawDataDaqSource>
+   <flags SEAL_PLUGIN_NAME="testIoRawDataDaqSource"> 
+   <use name=cppunit>
+   <use name=DataFormats/FEDRawData>
+</library> 
+
+
+<bin name=testDaqSource file=testRunner.cc,testDaqSource.cc>
+   <use name=cppunit>
+</bin>
+
