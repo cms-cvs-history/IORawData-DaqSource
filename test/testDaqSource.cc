@@ -1,8 +1,8 @@
 /* \file testDaqSource.cc
  *
- *  $Date: $
- *  $Revision: $
- *  \author N. Amapane - CERN
+ *  $Date: 2005/09/30 08:17:48 $
+ *  $Revision: 1.1 $
+ *  \author S. Argiro, N. Amapane - CERN
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -125,7 +125,7 @@ void testDaqSource::testReadPool(){
     "process TEST = { \n"
     " module dummyunpacker = DummyUnpackingModule{ }\n"
     " path p = {dummyunpacker}\n"
-    " source = PoolInputService{ string fileName =\"" + testfileLocation+ "rawdata.root" +"\"} \n"
+    " source = PoolSource{ string fileName =\"" + testfileLocation+ "rawdata.root" +"\"} \n"
     "}\n";
 
   int rc = runIt(config);
