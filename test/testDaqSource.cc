@@ -1,7 +1,7 @@
 /* \file testDaqSource.cc
  *
- *  $Date: 2005/09/30 08:17:48 $
- *  $Revision: 1.1 $
+ *  $Date: 2005/10/06 18:23:47 $
+ *  $Revision: 1.2 $
  *  \author S. Argiro, N. Amapane - CERN
  */
 
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-string releasetop(getenv("SCRAMRT_LOCALRT"));
+string releasetop(getenv("LOCALRT"));
 string testfileLocation= releasetop + "/src/IORawData/DaqSource/test/";
 
 class testDaqSource: public CppUnit::TestFixture {
@@ -38,7 +38,7 @@ public:
 
 
   void setUp(){
-    char * ret = getenv("SCRAMRT_LOCALRT");
+    char * ret = getenv("LOCALRT");
     if (!ret) {
       cerr<< "env variable SCRAMRT_LOCALRT not set, try eval `scramv1 runt -csh`"<< endl;
       exit(1);
