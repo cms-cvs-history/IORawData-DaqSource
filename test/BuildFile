@@ -8,7 +8,7 @@
 </library> 
 
 
-<bin name=testDaqSource file=testRunner.cc,testDaqSource.cc>
+<bin name=testDaqSource file=testDaqSource.cpp>
    <use name=cppunit>
 </bin>
 
