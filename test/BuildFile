@@ -2,13 +2,13 @@
 <use name=FWCore/Framework>
 
 <library file=stubs/DummyUnpackingModule.cc name=testIoRawDataDaqSource>
-   <flags SEAL_PLUGIN_NAME="testIoRawDataDaqSource"> 
+   <flags EDM_PLUGIN=1> 
    <use name=cppunit>
    <use name=DataFormats/FEDRawData>
 </library> 
 
   <library file="SecondaryProducer.cc" name=RawDataPlayback>
-   <flags SEAL_PLUGIN_NAME="RawDataPlayback">
+   <flags EDM_PLUGIN=1>
    <use name=DataFormats/FEDRawData>
    <use name=FWCore/Framework>
   </library>
