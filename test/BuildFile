@@ -1,18 +1,22 @@
-<use name=IORawData/DaqSource>
 <use name=FWCore/Framework>
-
-<library file=stubs/DummyUnpackingModule.cc name=testIoRawDataDaqSource>
+  <library file=stubs/DummyUnpackingModule.cc name=testIoRawDataDaqSource>
    <flags EDM_PLUGIN=1> 
    <use name=cppunit>
    <use name=DataFormats/FEDRawData>
-</library> 
+  </library> 
 
   <library file="SecondaryProducer.cc" name=RawDataPlayback>
    <flags EDM_PLUGIN=1>
+   <use name=IORawData/DaqSource>
    <use name=DataFormats/FEDRawData>
-   <use name=FWCore/Framework>
   </library>
-</environment>
+
+  <library file="DaqFakeReader.cc" name=DaqFakeReader>
+   <flags EDM_PLUGIN=1>
+   <use name=IORawData/DaqSource>
+   <use name=DataFormats/FEDRawData>
+   <use name=CLHEP>
+  </library>
 
 <bin name=testDaqSource file=testDaqSource.cpp>
    <use name=cppunit>
