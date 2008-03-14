@@ -1,7 +1,7 @@
 /** \file 
  *
- *  $Date: 2008/02/29 21:13:15 $
- *  $Revision: 1.19 $
+ *  $Date: 2008/03/14 00:33:49 $
+ *  $Revision: 1.19.2.1 $
  *  \author N. Amapane - S. Argiro'
  */
 
@@ -133,8 +133,8 @@ namespace edm {
       unsigned char *fedAddr = fedCollection->FEDData(daqsource::gtpEvmId_).data();
       if(evf::evtn::evm_board_sense(fedAddr)){
 	unsigned int thisEventLSid = evf::evtn::getlbn(fedAddr);
-	if(luminosityBlockNumber_ != thisEventLSid){
-	  luminosityBlockNumber_ = thisEventLSid;
+	if(luminosityBlockNumber_ != (thisEventLSid + 1)){
+	  luminosityBlockNumber_ = thisEventLSid + 1;
 	  newLumi_ = true;
 	  resetLuminosityBlockPrincipal();
 	}
