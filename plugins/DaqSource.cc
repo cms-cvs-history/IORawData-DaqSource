@@ -1,13 +1,16 @@
 /** \file 
  *
- *  $Date: 2008/01/29 21:45:26 $
- *  $Revision: 1.17 $
+ *  $Date: 2008/02/29 21:13:15 $
+ *  $Revision: 1.19 $
  *  \author N. Amapane - S. Argiro'
  */
 
 #include "DaqSource.h"
 
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
+#include "DataFormats/FEDRawData/interface/FEDNumbering.h"
+
+#include "EventFilter/Utilities/interface/GlobalEventNumber.h"
 
 #include "IORawData/DaqSource/interface/DaqBaseReader.h"
 #include "IORawData/DaqSource/interface/DaqReaderPluginFactory.h"
@@ -31,7 +34,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace edm {
-
+  namespace daqsource{
+    static unsigned int gtpEvmId_ =  FEDNumbering::getTriggerGTPFEDIds().first;
+  }
   //______________________________________________________________________________
   DaqSource::DaqSource(const ParameterSet& pset, 
 		     const InputSourceDescription& desc) 
@@ -124,7 +129,17 @@ namespace edm {
         newLumi_ = true;
 	resetLuminosityBlockPrincipal();
     }
-
+    else if(!fakeLSid_){ 
+      unsigned char *fedAddr = fedCollection->FEDData(daqsource::gtpEvmId_).data();
+      if(evf::evtn::evm_board_sense(fedAddr)){
+	unsigned int thisEventLSid = evf::evtn::getlbn(fedAddr);
+	if(luminosityBlockNumber_ != thisEventLSid){
+	  luminosityBlockNumber_ = thisEventLSid;
+	  newLumi_ = true;
+	  resetLuminosityBlockPrincipal();
+	}
+      }
+    }
     eventId = EventID(runNumber_, eventId.event());
     
     // If there is no luminosity block principal, make one.
