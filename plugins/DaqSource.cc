@@ -1,13 +1,16 @@
 /** \file 
  *
- *  $Date: 2008/01/31 04:54:45 $
- *  $Revision: 1.18 $
+ *  $Date: 2008/03/14 00:33:49 $
+ *  $Revision: 1.19.2.1 $
  *  \author N. Amapane - S. Argiro'
  */
 
 #include "DaqSource.h"
 
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
+#include "DataFormats/FEDRawData/interface/FEDNumbering.h"
+
+#include "EventFilter/Utilities/interface/GlobalEventNumber.h"
 
 #include "IORawData/DaqSource/interface/DaqBaseReader.h"
 #include "IORawData/DaqSource/interface/DaqReaderPluginFactory.h"
@@ -16,8 +19,6 @@
 #include "FWCore/Framework/interface/EventPrincipal.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
-#include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
-#include "DataFormats/Provenance/interface/RunAuxiliary.h"
 #include "DataFormats/Provenance/interface/EventID.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/LuminosityBlockPrincipal.h"
@@ -33,7 +34,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace edm {
-
+  namespace daqsource{
+    static unsigned int gtpEvmId_ =  FEDNumbering::getTriggerGTPFEDIds().first;
+  }
   //______________________________________________________________________________
   DaqSource::DaqSource(const ParameterSet& pset, 
 		     const InputSourceDescription& desc) 
@@ -126,26 +129,35 @@ namespace edm {
         newLumi_ = true;
 	resetLuminosityBlockPrincipal();
     }
-
+    else if(!fakeLSid_){ 
+      unsigned char *fedAddr = fedCollection->FEDData(daqsource::gtpEvmId_).data();
+      if(evf::evtn::evm_board_sense(fedAddr)){
+	unsigned int thisEventLSid = evf::evtn::getlbn(fedAddr);
+	if(luminosityBlockNumber_ != (thisEventLSid + 1)){
+	  luminosityBlockNumber_ = thisEventLSid + 1;
+	  newLumi_ = true;
+	  resetLuminosityBlockPrincipal();
+	}
+      }
+    }
     eventId = EventID(runNumber_, eventId.event());
     
     // If there is no luminosity block principal, make one.
     if (luminosityBlockPrincipal().get() == 0 || luminosityBlockPrincipal()->luminosityBlock() != luminosityBlockNumber_) {
       newLumi_ = true;
-      LuminosityBlockAuxiliary lumiAux(runPrincipal()->run(),
-        luminosityBlockNumber_, timestamp(), Timestamp::invalidTimestamp());
       setLuminosityBlockPrincipal(boost::shared_ptr<LuminosityBlockPrincipal>(
-        new LuminosityBlockPrincipal(lumiAux,
+        new LuminosityBlockPrincipal(luminosityBlockNumber_,
+                                     timestamp(),
+                                     Timestamp::invalidTimestamp(),
                                      productRegistry(),
                                      runPrincipal(),
                                      processConfiguration())));
 
     }
     // make a brand new event
-    EventAuxiliary eventAux(eventId,
-      processGUID(), timestamp(), luminosityBlockPrincipal()->luminosityBlock(), true, EventAuxiliary::Data);
     ep_ = std::auto_ptr<EventPrincipal>(
-	new EventPrincipal(eventAux, productRegistry(), luminosityBlockPrincipal(), processConfiguration()));
+	new EventPrincipal(eventId, processGUID(), timestamp(),
+	productRegistry(), luminosityBlockPrincipal(), processConfiguration(), true, EventAuxiliary::Data));
     
     // have fedCollection managed by a std::auto_ptr<>
     std::auto_ptr<FEDRawDataCollection> bare_product(fedCollection);
@@ -177,9 +189,10 @@ namespace edm {
     assert(newRun_);
     assert(!noMoreEvents_);
     newRun_ = false;
-    RunAuxiliary runAux(runNumber_, timestamp(), Timestamp::invalidTimestamp());
     return boost::shared_ptr<RunPrincipal>(
-	new RunPrincipal(runAux,
+	new RunPrincipal(runNumber_,
+			 timestamp(),
+			 Timestamp::invalidTimestamp(),
 			 productRegistry(),
 			 processConfiguration()));
   }
