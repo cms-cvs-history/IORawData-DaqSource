@@ -1,7 +1,7 @@
 /** \file 
  *
- *  $Date: 2008/10/16 23:12:34 $
- *  $Revision: 1.28 $
+ *  $Date: 2008/10/17 10:42:35 $
+ *  $Revision: 1.29 $
  *  \author N. Amapane - S. Argiro'
  */
 
@@ -167,7 +167,7 @@ namespace edm {
         << "The reader used with DaqSource has returned an invalid (zero) event number!\n"
         << "Event numbers must begin at 1, not 0.";
     }
-    EventSourceSentry(*this);
+    //    EventSourceSentry(*this);
     setTimestamp(tstamp);
     
     unsigned char *gtpFedAddr = fedCollection->FEDData(daqsource::gtpEvmId_).data();
@@ -178,6 +178,7 @@ namespace edm {
 	pthread_mutex_lock(&mutex_);
 	pthread_cond_signal(&cond_);
 	pthread_mutex_unlock(&mutex_);
+	::usleep(1000);
 	pthread_mutex_lock(&mutex_);
 	pthread_mutex_unlock(&mutex_);
         newLumi_ = true;
@@ -193,6 +194,7 @@ namespace edm {
 	  pthread_mutex_lock(&mutex_);
 	  pthread_cond_signal(&cond_);
 	  pthread_mutex_unlock(&mutex_);
+	  ::usleep(1000);
 	  pthread_mutex_lock(&mutex_);
 	  pthread_mutex_unlock(&mutex_);
 	  newLumi_ = true;
@@ -207,6 +209,7 @@ namespace edm {
 	  pthread_mutex_lock(&mutex_);
 	  pthread_cond_signal(&cond_);
 	  pthread_mutex_unlock(&mutex_);
+	  ::usleep(1000);
 	  pthread_mutex_lock(&mutex_);
 	  pthread_mutex_unlock(&mutex_);
 	  newLumi_ = true;
@@ -354,5 +357,6 @@ namespace edm {
     count--;
     pthread_mutex_unlock(&mutex_);
     lsTimedOut_.value_ = false; 
+    ::usleep(1000);
   }
 }
