@@ -1,7 +1,7 @@
 /** \file 
  *
- *  $Date: 2008/11/04 14:47:39 $
- *  $Revision: 1.29.2.1 $
+ *  $Date: 2008/11/27 17:01:33 $
+ *  $Revision: 1.29.2.2 $
  *  \author N. Amapane - S. Argiro'
  */
 
@@ -9,7 +9,7 @@
 
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
-#include "EventFilter/Utilities/interface/GlobalEventNumber.h"
+#include "EventFilter/FEDInterface/interface/GlobalEventNumber.h"
 
 #include "IORawData/DaqSource/interface/DaqBaseReader.h"
 #include "IORawData/DaqSource/interface/DaqReaderPluginFactory.h"
@@ -175,6 +175,9 @@ namespace edm {
     setTimestamp(tstamp);
     
     unsigned char *gtpFedAddr = fedCollection->FEDData(daqsource::gtpEvmId_).size()!=0 ? fedCollection->FEDData(daqsource::gtpEvmId_).data() : 0;
+    uint32_t gtpsize = 0;
+    edm::EventAuxiliary::ExperimentType evttype = EventAuxiliary::Data;
+    if(gtpFedAddr !=0) gtpsize = fedCollection->FEDData(daqsource::gtpEvmId_).size();
     unsigned char *gtpeFedAddr = fedCollection->FEDData(daqsource::gtpeId_).size()!=0 ? fedCollection->FEDData(daqsource::gtpeId_).data() : 0; 
 
     if(fakeLSid_ && luminosityBlockNumber_ != ((eventId.event() - 1)/lumiSegmentSizeInEvents_ + 1)) {
@@ -196,8 +199,9 @@ namespace edm {
     }
     else if(!fakeLSid_){ 
 
-      if(gtpFedAddr!=0 && evf::evtn::evm_board_sense(gtpFedAddr)){
+      if(gtpFedAddr!=0 && evf::evtn::evm_board_sense(gtpFedAddr,gtpsize)){
 	unsigned int thisEventLSid = evf::evtn::getlbn(gtpFedAddr);
+	evttype =  edm::EventAuxiliary::ExperimentType(evf::evtn::getevtyp(gtpFedAddr));
 	if(luminosityBlockNumber_ != (thisEventLSid + 1)){
 	  luminosityBlockNumber_ = thisEventLSid + 1;
 
@@ -218,6 +222,7 @@ namespace edm {
       }
       else if(gtpeFedAddr!=0 && evf::evtn::gtpe_board_sense(gtpeFedAddr)){
 	unsigned int thisEventLSid = evf::evtn::gtpe_getlbn(gtpeFedAddr);
+	evttype =  edm::EventAuxiliary::ExperimentType(1); // temporary fix waiting for 3_1 experimenttype values to come into effect
 	if(luminosityBlockNumber_ != (thisEventLSid + 1)){
 	  luminosityBlockNumber_ = thisEventLSid + 1;
 
@@ -237,9 +242,12 @@ namespace edm {
 	}
       }
     }
-    if(gtpFedAddr!=0 && evf::evtn::evm_board_sense(gtpFedAddr)){
+    if(gtpFedAddr!=0 && evf::evtn::evm_board_sense(gtpFedAddr,gtpsize)){
       bunchCrossing =  int(evf::evtn::getfdlbx(gtpFedAddr));
       orbitNumber =  int(evf::evtn::getorbit(gtpFedAddr));
+      TimeValue_t time = evf::evtn::getgpshigh(gtpFedAddr);
+      time = (time << 32) + evf::evtn::getgpslow(gtpFedAddr);
+      Timestamp tstamp(time);
     }
     else if(gtpeFedAddr!=0 && evf::evtn::gtpe_board_sense(gtpeFedAddr)){
       bunchCrossing =  int(evf::evtn::gtpe_getbx(gtpeFedAddr));
@@ -260,7 +268,7 @@ namespace edm {
     }
     // make a brand new event
     EventAuxiliary eventAux(eventId,
-      processGUID(), timestamp(), luminosityBlockPrincipal()->luminosityBlock(), true, EventAuxiliary::Data, bunchCrossing, EventAuxiliary::invalidStoreNumber,
+      processGUID(), timestamp(), luminosityBlockPrincipal()->luminosityBlock(), true, evttype, bunchCrossing, EventAuxiliary::invalidStoreNumber,
 			    orbitNumber);
     ep_ = std::auto_ptr<EventPrincipal>(
 	new EventPrincipal(eventAux, productRegistry(), processConfiguration()));
