@@ -1,7 +1,7 @@
 /** \file 
  *
- *  $Date: 2008/11/27 17:01:33 $
- *  $Revision: 1.29.2.2 $
+ *  $Date: 2009/04/09 21:34:42 $
+ *  $Revision: 1.29.2.3 $
  *  \author N. Amapane - S. Argiro'
  */
 
@@ -201,6 +201,7 @@ namespace edm {
 
       if(gtpFedAddr!=0 && evf::evtn::evm_board_sense(gtpFedAddr,gtpsize)){
 	unsigned int thisEventLSid = evf::evtn::getlbn(gtpFedAddr);
+	prescaleSetIndex_.value_ = (evf::evtn::getfdlpsc(gtpFedAddr) & 0x7);
 	evttype =  edm::EventAuxiliary::ExperimentType(evf::evtn::getevtyp(gtpFedAddr));
 	if(luminosityBlockNumber_ != (thisEventLSid + 1)){
 	  luminosityBlockNumber_ = thisEventLSid + 1;
