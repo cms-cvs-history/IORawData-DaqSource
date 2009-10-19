@@ -233,11 +233,13 @@ namespace edm {
       TimeValue_t time = evf::evtn::getgpshigh(gtpFedAddr);
       time = (time << 32) + evf::evtn::getgpslow(gtpFedAddr);
       Timestamp tstamp(time);
+      setTimestamp(tstamp);
     }
     else if(gtpeFedAddr!=0 && evf::evtn::gtpe_board_sense(gtpeFedAddr)){
       bunchCrossing =  int(evf::evtn::gtpe_getbx(gtpeFedAddr));
       orbitNumber =  int(evf::evtn::gtpe_getorbit(gtpeFedAddr));
     }
+    
     eventId = EventID(runNumber_, eventId.event());
     
     // If there is no luminosity block principal, make one.
@@ -251,10 +253,10 @@ namespace edm {
     }
 
     // make a brand new event
-    eventId.setLuminosityBlockNumber(luminosityBlockNumber_);
     std::auto_ptr<EventAuxiliary> eventAux(
       new EventAuxiliary(eventId, processGUID(),
 			 timestamp(),
+			 luminosityBlockNumber_,
 			 true,
 			 evttype,
 			 bunchCrossing,
