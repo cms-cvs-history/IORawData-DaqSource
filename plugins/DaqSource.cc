@@ -1,7 +1,7 @@
 /** \file 
  *
- *  $Date: 2009/07/07 16:33:33 $
- *  $Revision: 1.32 $
+ *  $Date: 2009/07/08 13:54:55 $
+ *  $Revision: 1.33 $
  *  \author N. Amapane - S. Argiro'
  */
 
@@ -235,6 +235,7 @@ namespace edm {
       TimeValue_t time = evf::evtn::getgpshigh(gtpFedAddr);
       time = (time << 32) + evf::evtn::getgpslow(gtpFedAddr);
       Timestamp tstamp(time);
+      setTimestamp(tstamp);
     }
     else if(gtpeFedAddr!=0 && evf::evtn::gtpe_board_sense(gtpeFedAddr)){
       bunchCrossing =  int(evf::evtn::gtpe_getbx(gtpeFedAddr));
