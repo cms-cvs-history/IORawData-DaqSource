@@ -1,7 +1,7 @@
 /** \file 
  *
- *  $Date: 2011/10/14 18:30:19 $
- *  $Revision: 1.55 $
+ *  $Date: 2012/04/17 14:39:30 $
+ *  $Revision: 1.55.2.1 $
  *  \author N. Amapane - S. Argiro'
  */
 
@@ -147,7 +147,7 @@ namespace edm {
 	  gettimeofday(&tsTmp,NULL);
 	  long tusecs = (tsTmp.tv_sec-tvStat_.tv_sec)*1000000 + tsTmp.tv_usec - tvStat_.tv_usec;
 	  double tsecs = ((double)(tusecs/10000))/100.;
-	  //std::cout << "DaqSource: FWK beginRun elapsed time: " << tsecs << " seconds "<< std::endl;
+	  std::cout << "DaqSource: FWK beginRun elapsed time: " << tsecs << " seconds "<< std::endl;
 	  edm::LogInfo("DaqSource") << "FWK beginRun elapsed time: " << tsecs << " seconds ";
 	  beginRunTiming_=false;
 	  usleep(10000);//short sleep before fork
@@ -218,6 +218,12 @@ namespace edm {
       if (queueNext == 2) runFork_=true;
     }
 
+    //get initial time before beginRun (used with old forking)
+    if (!forkInfo_ && newRun_) {
+      beginRunTiming_=true;
+      gettimeofday(&tvStat_, NULL);
+    }
+
     if (immediateStop) return IsStop;
 
     // --------------
@@ -231,6 +237,18 @@ namespace edm {
     if (newRun_) {
       return IsRun;
     }
+
+    //calculate and print the beginRun the timing
+    if (beginRunTiming_) {
+      timeval tsTmp;
+      gettimeofday(&tsTmp,NULL);
+      long tusecs = (tsTmp.tv_sec-tvStat_.tv_sec)*1000000 + tsTmp.tv_usec - tvStat_.tv_usec;
+      double tsecs = ((double)(tusecs/10000))/100.;
+      std::cout << "DaqSource (pid "<< getpid() << " ): FWK beginRun elapsed time: " 
+		<< tsecs << " seconds "<< std::endl;
+      beginRunTiming_=false;
+    }
+
     if (newLumi_ && luminosityBlockAuxiliary()) {
       //      std::cout << "newLumi & lumiblock valid " << std::endl;
       return IsLumi;
