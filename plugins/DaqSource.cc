@@ -1,7 +1,7 @@
 /** \file 
  *
- *  $Date: 2012/04/17 14:39:30 $
- *  $Revision: 1.55.2.1 $
+ *  $Date: 2012/04/18 15:34:01 $
+ *  $Revision: 1.55.2.2 $
  *  \author N. Amapane - S. Argiro'
  */
 
@@ -147,8 +147,8 @@ namespace edm {
 	  gettimeofday(&tsTmp,NULL);
 	  long tusecs = (tsTmp.tv_sec-tvStat_.tv_sec)*1000000 + tsTmp.tv_usec - tvStat_.tv_usec;
 	  double tsecs = ((double)(tusecs/10000))/100.;
-	  std::cout << "DaqSource: FWK beginRun elapsed time: " << tsecs << " seconds "<< std::endl;
-	  edm::LogInfo("DaqSource") << "FWK beginRun elapsed time: " << tsecs << " seconds ";
+	  std::cout << "DaqSource: FWK beginRun elapsed time: " << tsecs << " seconds in master EP"<< std::endl;
+	  edm::LogInfo("DaqSource") << "FWK beginRun elapsed time: " << tsecs << " seconds in master EP";
 	  beginRunTiming_=false;
 	  usleep(10000);//short sleep before fork
 	}
@@ -244,8 +244,10 @@ namespace edm {
       gettimeofday(&tsTmp,NULL);
       long tusecs = (tsTmp.tv_sec-tvStat_.tv_sec)*1000000 + tsTmp.tv_usec - tvStat_.tv_usec;
       double tsecs = ((double)(tusecs/10000))/100.;
-      std::cout << "DaqSource (pid "<< getpid() << " ): FWK beginRun elapsed time: " 
+      std::cout << "DaqSource (slave pid "<< getpid() << " ): FWK beginRun elapsed time: " 
 		<< tsecs << " seconds "<< std::endl;
+      edm::LogInfo("DaqSource") << "DaqSource (slave pid "<< getpid() << " ): FWK beginRun elapsed time: " 
+		<< tsecs << " seconds ";
       beginRunTiming_=false;
     }
 
